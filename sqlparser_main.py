@@ -7,6 +7,7 @@ import sys
 from datetime import datetime
 from LowLevelLinesParser import LowLevelLinesParser
 from sqlparser_commonclasses import SQLToken
+from SQLPatternMatcher import SQLPatternMatcher
 # from typing import ContextManager
 
 #-----------------------------------------------------------------------------------------------
@@ -23,7 +24,10 @@ def parse_one_file():
     file1.close()
 
     MyLowLevelLinesParser = LowLevelLinesParser()
+    MySQLPatternMatcher = SQLPatternMatcher()
+
     FoundTokens = MyLowLevelLinesParser.ParseLines(Lines, file_allrpt, infile)
+    MySQLPatternMatcher.SQLPatternMatcher_main(FoundTokens, file_allrpt, infile)
 
     file2 = open(outfile, 'w')
     file2.write(myheader)

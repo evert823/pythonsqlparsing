@@ -12,6 +12,8 @@
 # 
 import re
 from sqlparser_commonclasses import SQLToken
+from sqlparser_commonclasses import KeywordList
+
 class LowLevelLinesParser:
     #-----------------------------------------------------------------------------------------------
     def InterpretElement(self, pprevline, pprevcol, pelttype, pcontent):
@@ -22,11 +24,13 @@ class LowLevelLinesParser:
         MyToken.eline = currentlinenumber
         MyToken.ecol = currentcolumnnumber
         if pelttype == "WORD":
-            if pcontent in ("SELECT", "INSERT", "UPDATE", "CREATE", "DELETE"):
-                #We'll organize the list of keywords later
+            if pcontent in MyKeywordList.ValidKeyWords:
                 MyToken.TokenType = "KEYWORD"
             else:
                 MyToken.TokenType = "VARIABLE"
+        elif pelttype == "QUOTEDIDENTIFIER":
+            MyToken.TokenType = "VARIABLE"
+            MyToken.IsQuotedIdentifier = True
         else:
             MyToken.TokenType = pelttype
         MyToken.TokenContent = pcontent
@@ -57,17 +61,6 @@ class LowLevelLinesParser:
             return True
         else:
             return False
-    #-----------------------------------------------------------------------------------------------
-    def SampleIterateAllLinesColumns(self):
-        global currentlinenumber
-        global currentcolumnnumber
-    
-        while not self.EndOfFileReached():
-            print(infile + " ln " + str(currentlinenumber) + " col " + str(currentcolumnnumber) + " " + Lines[currentlinenumber][currentcolumnnumber])
-            currentcolumnnumber += 1
-            if self.EndOfLineReached():
-                currentlinenumber += 1
-                currentcolumnnumber = 0
     #-----------------------------------------------------------------------------------------------
     def GoNextNonEmpty(self):
         global currentlinenumber
@@ -129,7 +122,7 @@ class LowLevelLinesParser:
         else:
             pass
     #-----------------------------------------------------------------------------------------------
-    def IdentifyNextStringLiteral_allows_multiline(self):
+    def IdentifyNextStringLiteral(self):
         global currentlinenumber
         global currentcolumnnumber
         global moved
@@ -185,47 +178,48 @@ class LowLevelLinesParser:
                 self.InterpretElement(prevline, prevcol, "STRINGLITERAL", strcontent)
                 StringLiteralStarted = False
     #-----------------------------------------------------------------------------------------------
-    def IdentifyNextStringLiteral(self):
+    def IdentifyNextQuotedIdentifier(self):
         global currentlinenumber
         global currentcolumnnumber
         global moved
-        StringLiteralStarted = False
+        QuotedIdentifierStarted = False
         self.GoNextNonEmpty()
         if self.EndOfFileReached():
             pass
-        elif Lines[currentlinenumber][currentcolumnnumber] == "'":
-            StringLiteralStarted = True
+        elif Lines[currentlinenumber][currentcolumnnumber] == '"':
+            QuotedIdentifierStarted = True
             moved = True
             prevline = currentlinenumber
             prevcol = currentcolumnnumber
         else:
             pass
     
-        if StringLiteralStarted == True:
+        if QuotedIdentifierStarted == True:
             currentcolumnnumber += 1
+        while QuotedIdentifierStarted == True and not self.EndOfFileReached():
+            if self.EndOfLineReached():
+                currentlinenumber += 1
+                currentcolumnnumber = 0
     
-            col = Lines[currentlinenumber][currentcolumnnumber:].find("''")
-            check1 = Lines[currentlinenumber][currentcolumnnumber:].find("'")
-            while col != -1 and col == check1:
-                currentcolumnnumber = currentcolumnnumber + col + 2
-                if ReportAllElements == True:
-                    self.ReportElement(currentlinenumber, currentcolumnnumber - 2, "MESSAGE", "Double single quote inside string literal interpreted as one single quote")
-                col = Lines[currentlinenumber][currentcolumnnumber:].find("''")
-                check1 = Lines[currentlinenumber][currentcolumnnumber:].find("'")
-    
-            col = Lines[currentlinenumber][currentcolumnnumber:].find("'")
+            col = Lines[currentlinenumber][currentcolumnnumber:].find('"')
             if col == -1:
-                self.ReportElement(currentlinenumber, currentcolumnnumber, "MESSAGE", "ERROR no closing quote found for starting string literal")
                 currentlinenumber += 1
                 currentcolumnnumber = 0
             else:
-                strcontent = Lines[currentlinenumber][prevcol + 1:currentcolumnnumber + col]
-                strcontent = strcontent.replace("''", "'")
                 currentcolumnnumber = currentcolumnnumber + col + 1
+                l = prevline
+                c = prevcol + 1
+                strcontent = ""
+                while l < currentlinenumber:
+                    strcontent = strcontent + Lines[l][c:]
+                    l += 1
+                    c = 0
+                strcontent = strcontent + Lines[currentlinenumber][c:currentcolumnnumber - 1]
                 if self.EndOfLineReached():
                     currentlinenumber += 1
                     currentcolumnnumber = 0
-                self.InterpretElement(prevline, prevcol, "STRINGLITERAL", strcontent)
+                self.InterpretElement(prevline, prevcol, "QUOTEDIDENTIFIER", strcontent)
+                QuotedIdentifierStarted = False
     #-----------------------------------------------------------------------------------------------
     def IdentifyNextNumberLiteral(self):
         global currentlinenumber
@@ -323,7 +317,10 @@ class LowLevelLinesParser:
         global moved
         global ReportAllElements
         global FoundTokens
+        global MyKeywordList
 
+        MyKeywordList = KeywordList()
+        
         ReportAllElements = True
         Lines = pLines
         file_allrpt = pReportFile
@@ -336,16 +333,18 @@ class LowLevelLinesParser:
 
         FoundTokens = []
 
+        tokencounter = 0
+
         while self.EndOfFileReached() == False:
             moved = False
             if moved == False and self.EndOfFileReached() == False:
                 self.IdentifyNextMultiLineComment()
             if moved == False and self.EndOfFileReached() == False:
                 self.IdentifyNextSingleLineComment()
-            #if moved == False and self.EndOfFileReached() == False:
-            #    self.IdentifyNextStringLiteral()
             if moved == False and self.EndOfFileReached() == False:
-                self.IdentifyNextStringLiteral_allows_multiline()
+                self.IdentifyNextStringLiteral()
+            if moved == False and self.EndOfFileReached() == False:
+                self.IdentifyNextQuotedIdentifier()
             if moved == False and self.EndOfFileReached() == False:
                 self.IdentifyNextNumberLiteral()
             if moved == False and self.EndOfFileReached() == False:
@@ -354,6 +353,9 @@ class LowLevelLinesParser:
                 self.IdentifyNextSingleChar()
             if moved == False and self.EndOfFileReached() == False:
                 self.IdentifyNextIllegalChar()
+            tokencounter += 1
+            if tokencounter % 100000 == 0:
+                print(str(tokencounter) + " tokens found in " + infile)
         
         return FoundTokens
     #-----------------------------------------------------------------------------------------------
