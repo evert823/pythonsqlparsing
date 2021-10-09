@@ -58,9 +58,20 @@ class PatternList:
         self.ValidPatterns = []
 
         MyPattern = ParsePattern()
-        MyPattern.PatternName = "COMMA_COLUMN"
-        MyPattern.AddPatternToken("SINGLECHAR", ",", "", "", False, False)
+        MyPattern.PatternName = "INSERT_V5421"
+        MyPattern.AddPatternToken("PATTERN", "", "", "STARTINSERT", False, False)
+        MyPattern.AddPatternToken("KEYWORD", "SELECT", "", "", False, False)
+        MyPattern.AddPatternToken("PATTERN", "", "", "ALIASDOT", True, False)
         MyPattern.AddPatternToken("VARIABLE", "", "COLUMNNAME", "", False, False)
+        MyPattern.AddPatternToken("PATTERN", "", "", "COMMA_COLUMN", True, True)
+        MyPattern.AddPatternToken("SINGLECHAR", ",", "", "", False, False)
+        MyPattern.AddPatternToken("STRINGLITERAL", "", "", "", False, False)
+        MyPattern.AddPatternToken("KEYWORD", "FROM", "", "", False, False)
+        MyPattern.AddPatternToken("SINGLECHAR", "(", "", "", False, False)
+        MyPattern.AddPatternToken("PATTERN", "", "", "SELECTCOLUMNSFROMTABLEWHERE", False, False)
+        MyPattern.AddPatternToken("SINGLECHAR", ")", "", "", False, False)
+        MyPattern.AddPatternToken("VARIABLE", "", "ALIAS", "", True, False)
+        MyPattern.AddPatternToken("SINGLECHAR", ";", "", "", False, False)
         self.ValidPatterns.append(MyPattern)
         del MyPattern
 
@@ -87,21 +98,6 @@ class PatternList:
         del MyPattern
 
         MyPattern = ParsePattern()
-        MyPattern.PatternName = "SELECTCOLUMNSFROMTABLEALIAS"
-        MyPattern.AddPatternToken("KEYWORD", "SELECT", "", "", False, False)
-        MyPattern.AddPatternToken("VARIABLE", "", "COLUMNNAME", "", False, False)
-        MyPattern.AddPatternToken("PATTERN", "", "", "COMMA_COLUMN", True, True)
-        MyPattern.AddPatternToken("KEYWORD", "FROM", "", "", False, False)
-        MyPattern.AddPatternToken("VARIABLE", "", "SCHEMANAME", "", False, False)
-        MyPattern.AddPatternToken("SINGLECHAR", ".", "", "", False, False)
-        MyPattern.AddPatternToken("VARIABLE", "", "TABLENAME", "", False, False)
-        MyPattern.AddPatternToken("KEYWORD", "AS", "", "", True, False)
-        MyPattern.AddPatternToken("VARIABLE", "", "TABLEALIAS", "", False, False)
-        MyPattern.AddPatternToken("SINGLECHAR", ";", "", "", False, False)
-        self.ValidPatterns.append(MyPattern)
-        del MyPattern
-
-        MyPattern = ParsePattern()
         MyPattern.PatternName = "PRIMARYINDEX"
         MyPattern.AddPatternToken("KEYWORD", "PRIMARY", "", "", False, False)
         MyPattern.AddPatternToken("KEYWORD", "INDEX", "", "", False, False)
@@ -115,6 +111,7 @@ class PatternList:
         MyPattern = ParsePattern()
         MyPattern.PatternName = "SELECTCOLUMNSFROMTABLEWHERE"
         MyPattern.AddPatternToken("KEYWORD", "SELECT", "", "", False, False)
+        MyPattern.AddPatternToken("PATTERN", "", "", "ALIASDOT", True, False)
         MyPattern.AddPatternToken("VARIABLE", "", "COLUMNNAME", "", False, False)
         MyPattern.AddPatternToken("PATTERN", "", "", "COMMA_COLUMN", True, True)
         MyPattern.AddPatternToken("KEYWORD", "FROM", "", "", False, False)
@@ -133,6 +130,7 @@ class PatternList:
         MyPattern = ParsePattern()
         MyPattern.PatternName = "SELECTCOLUMNSASALIASFROMTABLEWHERE"
         MyPattern.AddPatternToken("KEYWORD", "SELECT", "", "", False, False)
+        MyPattern.AddPatternToken("PATTERN", "", "", "ALIASDOT", True, False)
         MyPattern.AddPatternToken("VARIABLE", "", "COLUMNNAME", "", False, False)
         MyPattern.AddPatternToken("KEYWORD", "AS", "", "", False, False)
         MyPattern.AddPatternToken("VARIABLE", "", "COLUMNALIAS", "", False, False)
@@ -193,6 +191,35 @@ class PatternList:
         del MyPattern
 
         MyPattern = ParsePattern()
+        MyPattern.PatternName = "STARTINSERT"
+        MyPattern.AddPatternToken("KEYWORD", "INSERT", "", "", False, False)
+        MyPattern.AddPatternToken("KEYWORD", "INTO", "", "", False, False)
+        MyPattern.AddPatternToken("VARIABLE", "", "INTOSCHEMA", "", False, False)
+        MyPattern.AddPatternToken("SINGLECHAR", ".", "", "", False, False)
+        MyPattern.AddPatternToken("VARIABLE", "", "INTOTABLE", "", False, False)
+        MyPattern.AddPatternToken("SINGLECHAR", "(", "", "", False, False)
+        MyPattern.AddPatternToken("VARIABLE", "", "INTOCOLUMN", "", False, False)
+        MyPattern.AddPatternToken("PATTERN", "", "", "COMMA_COLUMN", True, True)
+        MyPattern.AddPatternToken("SINGLECHAR", ")", "", "", False, False)
+        self.ValidPatterns.append(MyPattern)
+        del MyPattern
+
+        MyPattern = ParsePattern()
+        MyPattern.PatternName = "COLLECTSTATS_ONVOLATILE"
+        MyPattern.AddPatternToken("KEYWORD", "COLLECT", "", "", False, False)
+        MyPattern.AddPatternToken("KEYWORD", "STATISTICS", "", "", False, False)
+        MyPattern.AddPatternToken("KEYWORD", "COLUMN", "", "", False, False)
+        MyPattern.AddPatternToken("SINGLECHAR", "(", "", "", False, False)
+        MyPattern.AddPatternToken("VARIABLE", "", "COLUMN", "", False, False)
+        MyPattern.AddPatternToken("SINGLECHAR", ")", "", "", False, False)
+        MyPattern.AddPatternToken("PATTERN", "", "", "COMMA_COLUMNINCOLLECTSTATS", True, True)
+        MyPattern.AddPatternToken("KEYWORD", "ON", "", "", False, False)
+        MyPattern.AddPatternToken("VARIABLE", "", "VOLATILETABLENAME", "", False, False)
+        MyPattern.AddPatternToken("SINGLECHAR", ";", "", "", False, False)
+        self.ValidPatterns.append(MyPattern)
+        del MyPattern
+
+        MyPattern = ParsePattern()
         MyPattern.PatternName = "STARTVOLATILE"
         MyPattern.AddPatternToken("KEYWORD", "CREATE", "", "", False, False)
         MyPattern.AddPatternToken("KEYWORD", "MULTISET", "", "", False, False)
@@ -201,6 +228,49 @@ class PatternList:
         MyPattern.AddPatternToken("VARIABLE", "", "VOLATILETABLENAME", "", False, False)
         MyPattern.AddPatternToken("KEYWORD", "AS", "", "", False, False)
         MyPattern.AddPatternToken("SINGLECHAR", "(", "", "", False, False)
+        self.ValidPatterns.append(MyPattern)
+        del MyPattern
+
+        MyPattern = ParsePattern()
+        MyPattern.PatternName = "ALIASDOT"
+        MyPattern.AddPatternToken("VARIABLE", "", "TABLEALIAS", "", False, False)
+        MyPattern.AddPatternToken("SINGLECHAR", ".", "", "", False, False)
+        self.ValidPatterns.append(MyPattern)
+        del MyPattern
+
+        MyPattern = ParsePattern()
+        MyPattern.PatternName = "COMMA_COLUMN"
+        MyPattern.AddPatternToken("SINGLECHAR", ",", "", "", False, False)
+        MyPattern.AddPatternToken("PATTERN", "", "", "ALIASDOT", True, False)
+        MyPattern.AddPatternToken("VARIABLE", "", "COLUMNNAME", "", False, False)
+        self.ValidPatterns.append(MyPattern)
+        del MyPattern
+
+        MyPattern = ParsePattern()
+        MyPattern.PatternName = "COMMA_COLUMNINCOLLECTSTATS"
+        MyPattern.AddPatternToken("SINGLECHAR", ",", "", "", False, False)
+        MyPattern.AddPatternToken("KEYWORD", "COLUMN", "", "", False, False)
+        MyPattern.AddPatternToken("SINGLECHAR", "(", "", "", False, False)
+        MyPattern.AddPatternToken("VARIABLE", "", "COLUMNNAME", "", False, False)
+        MyPattern.AddPatternToken("SINGLECHAR", ")", "", "", False, False)
+        self.ValidPatterns.append(MyPattern)
+        del MyPattern
+
+        MyPattern = ParsePattern()
+        MyPattern.PatternName = "QUIT_RC"
+        MyPattern.AddPatternToken("SINGLECHAR", ".", "", "", False, False)
+        MyPattern.AddPatternToken("KEYWORD", "QUIT", "", "", False, False)
+        MyPattern.AddPatternToken("NUMBERLITERAL", "", "RETURNCODE", "", False, False)
+        MyPattern.AddPatternToken("SINGLECHAR", ";", "", "", False, False)
+        self.ValidPatterns.append(MyPattern)
+        del MyPattern
+
+        MyPattern = ParsePattern()
+        MyPattern.PatternName = "LABELDEF"
+        MyPattern.AddPatternToken("SINGLECHAR", ".", "", "", False, False)
+        MyPattern.AddPatternToken("KEYWORD", "LABEL", "", "", False, False)
+        MyPattern.AddPatternToken("VARIABLE", "", "LABELNAME", "", False, False)
+        MyPattern.AddPatternToken("SINGLECHAR", ";", "", "", False, False)
         self.ValidPatterns.append(MyPattern)
         del MyPattern
 
@@ -244,4 +314,4 @@ class KeywordList:
                               "IF", "ERRORCODE", "THEN", "GOTO", "ON", "COMMIT",
                               "PRESERVE", "ROWS", "NOT", "NULL", "SUBSTR", "CASE", "WHEN",
                               "END", "COALESCE", "TO_DATE", "CAST", "BETWEEN",
-                              "SESSION", "INTO"}
+                              "INTO", "COLLECT", "STATISTICS", "COLUMN", "QUIT", "LABEL"}
