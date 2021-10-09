@@ -6,4 +6,4 @@ Patterns can include repeating tokens, optional tokens and subpatterns.
 Then class SQLPatternMatcher has a method that searches for the patterns in the incoming SQL.
 
 To test this:
-python sqlparser_main.py myinutfolder myoutputfolder
+python sqlparser_main.py myinputfolder myoutputfolder
