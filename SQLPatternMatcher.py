@@ -46,11 +46,11 @@ class SQLPatternMatcher:
 
         if ptype == "PATTERN":
             subpi = 0
-            while (MyPatternList.ValidPatterns[subpi].PatternName !=
-                      MyPatternList.ValidPatterns[ppatternidx].PatternTokens[ppatterntokenidx].ExpressesPattern and
-                      subpi < len(MyPatternList.ValidPatterns)):
+            while (subpi < len(MyPatternList.ValidPatterns) and MyPatternList.ValidPatterns[subpi].PatternName !=
+                      MyPatternList.ValidPatterns[ppatternidx].PatternTokens[ppatterntokenidx].ExpressesPattern):
                 subpi += 1
             if subpi >= len(MyPatternList.ValidPatterns):
+                print("Found invalid subpattern reference " + MyPatternList.ValidPatterns[ppatternidx].PatternTokens[ppatterntokenidx].ExpressesPattern)
                 MySubResult.Matches = False
                 MySubResult.newsqltokenidx = psqlidx + 1
                 return MySubResult
@@ -167,19 +167,22 @@ class SQLPatternMatcher:
                 p += 1
             if moved == False and p > len(MyPatternList.ValidPatterns) - 1:
                 #Now you're in an illegal syntax, but let's move on anyways
-                MySQLTokenInPattern = SQLTokenInPattern()
-                LastUsedFoundPatternIdx += 1
-                MySQLTokenInPattern.FoundPatternidx = LastUsedFoundPatternIdx
-                MySQLTokenInPattern.ParentFoundPatternidx = -1
-                MySQLTokenInPattern.originfilename = FoundTokens[FoundTokensPointer].originfilename
-                MySQLTokenInPattern.bline = FoundTokens[FoundTokensPointer].bline
-                MySQLTokenInPattern.bcol = FoundTokens[FoundTokensPointer].bcol
-                MySQLTokenInPattern.eline = FoundTokens[FoundTokensPointer].eline
-                MySQLTokenInPattern.ecol = FoundTokens[FoundTokensPointer].ecol
-                MySQLTokenInPattern.TokenType = FoundTokens[FoundTokensPointer].TokenType
-                MySQLTokenInPattern.TokenContent = FoundTokens[FoundTokensPointer].TokenContent
-                MySQLTokenInPattern.IsQuotedIdentifier = FoundTokens[FoundTokensPointer].IsQuotedIdentifier
-                FoundTokensInPatterns.append(MySQLTokenInPattern)
+
+                if FoundTokens[FoundTokensPointer].TokenType not in ("MULTILINECOMMENT", "SINGLELINECOMMENT"):
+                    MySQLTokenInPattern = SQLTokenInPattern()
+                    LastUsedFoundPatternIdx += 1
+                    MySQLTokenInPattern.FoundPatternidx = LastUsedFoundPatternIdx
+                    MySQLTokenInPattern.ParentFoundPatternidx = -1
+                    MySQLTokenInPattern.originfilename = FoundTokens[FoundTokensPointer].originfilename
+                    MySQLTokenInPattern.bline = FoundTokens[FoundTokensPointer].bline
+                    MySQLTokenInPattern.bcol = FoundTokens[FoundTokensPointer].bcol
+                    MySQLTokenInPattern.eline = FoundTokens[FoundTokensPointer].eline
+                    MySQLTokenInPattern.ecol = FoundTokens[FoundTokensPointer].ecol
+                    MySQLTokenInPattern.TokenType = FoundTokens[FoundTokensPointer].TokenType
+                    MySQLTokenInPattern.TokenContent = FoundTokens[FoundTokensPointer].TokenContent
+                    MySQLTokenInPattern.IsQuotedIdentifier = FoundTokens[FoundTokensPointer].IsQuotedIdentifier
+                    FoundTokensInPatterns.append(MySQLTokenInPattern)
+                
                 FoundTokensPointer += 1
 
         f = 0
