@@ -4,6 +4,7 @@
 from re import S
 from typing import MutableSequence
 from sqlparser_commonclasses import SQLToken
+from sqlparser_commonclasses import SQLTokenInPattern
 from sqlparser_commonclasses import PatternToken
 from sqlparser_commonclasses import ParsePattern
 from sqlparser_commonclasses import PatternList
@@ -12,6 +13,7 @@ class PatternIdentificationResult:
     def __init__(self):
         self.Matches = False
         self.newsqltokenidx = 0
+        self.CandidateIdentifiedPattern = []
 
 class SQLPatternMatcher:
     #-----------------------------------------------------------------------------------------------
@@ -29,17 +31,20 @@ class SQLPatternMatcher:
         else:
             return False
     #-----------------------------------------------------------------------------------------------
-    def MatchPatternToken(self, psqlidx, ppatternidx, ppatterntokenidx):
+    def MatchPatternToken(self, psqlidx, ppatternidx, ppatterntokenidx, pCandidateFoundPatternIdx, pParentFoundPatternIdx):
         # MyPatternList.ValidPatterns[ppatternidx].PatternTokens[ppatterntokenidx]
         # FoundTokens[psqlidx]
+
         MySubResult = PatternIdentificationResult()
 
         if FoundTokens[psqlidx].TokenType == "ILLEGALCHAR":
             MySubResult.Matches = False
             MySubResult.newsqltokenidx = psqlidx + 1
             return MySubResult
+        
+        ptype = MyPatternList.ValidPatterns[ppatternidx].PatternTokens[ppatterntokenidx].PatternTokenType
 
-        if MyPatternList.ValidPatterns[ppatternidx].PatternTokens[ppatterntokenidx].PatternTokenType == "PATTERN":
+        if ptype == "PATTERN":
             subpi = 0
             while (MyPatternList.ValidPatterns[subpi].PatternName !=
                       MyPatternList.ValidPatterns[ppatternidx].PatternTokens[ppatterntokenidx].ExpressesPattern and
@@ -50,31 +55,42 @@ class SQLPatternMatcher:
                 MySubResult.newsqltokenidx = psqlidx + 1
                 return MySubResult
             else:
-                return self.IdentifyNextPattern(psqlidx, subpi) # INDIRECT RECURSION
-        elif (MyPatternList.ValidPatterns[ppatternidx].PatternTokens[ppatterntokenidx].PatternTokenType 
-                        in ("STRINGLITERAL", "NUMBERLITERAL", "VARIABLE")
-                        and FoundTokens[psqlidx].TokenType ==
-                                MyPatternList.ValidPatterns[ppatternidx].PatternTokens[ppatterntokenidx].PatternTokenType):
+                return self.IdentifyNextPattern(psqlidx, subpi, pCandidateFoundPatternIdx) # INDIRECT RECURSION
+        elif (ptype in ("STRINGLITERAL", "NUMBERLITERAL", "VARIABLE", "KEYWORD", "SINGLECHAR")
+                        and FoundTokens[psqlidx].TokenType == ptype
+                        and (FoundTokens[psqlidx].TokenContent ==
+                                MyPatternList.ValidPatterns[ppatternidx].PatternTokens[ppatterntokenidx].PatternTokenContent
+                                 or ptype in ("STRINGLITERAL", "NUMBERLITERAL", "VARIABLE"))):
             MySubResult.Matches = True
             MySubResult.newsqltokenidx = psqlidx + 1
-            return MySubResult
-        elif (MyPatternList.ValidPatterns[ppatternidx].PatternTokens[ppatterntokenidx].PatternTokenType 
-                        in ("KEYWORD", "SINGLECHAR")
-                        and FoundTokens[psqlidx].TokenType ==
-                                MyPatternList.ValidPatterns[ppatternidx].PatternTokens[ppatterntokenidx].PatternTokenType
-                        and FoundTokens[psqlidx].TokenContent ==
-                                MyPatternList.ValidPatterns[ppatternidx].PatternTokens[ppatterntokenidx].PatternTokenContent):
-            MySubResult.Matches = True
-            MySubResult.newsqltokenidx = psqlidx + 1
+            MySQLTokenInPattern = SQLTokenInPattern()
+            MySQLTokenInPattern.PatternName = MyPatternList.ValidPatterns[ppatternidx].PatternName
+            MySQLTokenInPattern.PatternTokenidx = ppatterntokenidx
+            MySQLTokenInPattern.PatternTokenInterpretation = MyPatternList.ValidPatterns[ppatternidx].PatternTokens[ppatterntokenidx].PatternTokenInterpretation
+            MySQLTokenInPattern.FoundPatternidx = pCandidateFoundPatternIdx
+            MySQLTokenInPattern.ParentFoundPatternidx = pParentFoundPatternIdx
+            MySQLTokenInPattern.originfilename = FoundTokens[psqlidx].originfilename
+            MySQLTokenInPattern.bline = FoundTokens[psqlidx].bline
+            MySQLTokenInPattern.bcol = FoundTokens[psqlidx].bcol
+            MySQLTokenInPattern.eline = FoundTokens[psqlidx].eline
+            MySQLTokenInPattern.ecol = FoundTokens[psqlidx].ecol
+            MySQLTokenInPattern.TokenType = FoundTokens[psqlidx].TokenType
+            MySQLTokenInPattern.TokenContent = FoundTokens[psqlidx].TokenContent
+            MySQLTokenInPattern.IsQuotedIdentifier = FoundTokens[psqlidx].IsQuotedIdentifier
+            MySubResult.CandidateIdentifiedPattern.append(MySQLTokenInPattern)
             return MySubResult
         else:
             MySubResult.Matches = False
             MySubResult.newsqltokenidx = psqlidx + 1
             return MySubResult
     #-----------------------------------------------------------------------------------------------
-    def IdentifyNextPattern(self, psqltokenidx, ppatternidx):
+    def IdentifyNextPattern(self, psqltokenidx, ppatternidx, pParentFoundPatternIdx):
+        global LastUsedFoundPatternIdx
 
         MyResult = PatternIdentificationResult()
+
+        LastUsedFoundPatternIdx += 1
+        CandidateFoundPatternIdx = LastUsedFoundPatternIdx
 
         patterntokenidx = 0
         sqlidx = psqltokenidx
@@ -86,22 +102,18 @@ class SQLPatternMatcher:
                                                  or FoundTokens[sqlidx].TokenType == "SINGLELINECOMMENT")):
                 sqlidx += 1
             if self.EndOfSQL(sqlidx) == False:
-                thismatches = self.MatchPatternToken(sqlidx,ppatternidx, patterntokenidx)
-                s = ("Matching token SQL=" + FoundTokens[sqlidx].CsvLineFromToken() +
-                                   " Patterntoken=" + MyPatternList.ValidPatterns[ppatternidx].PatternTokens[patterntokenidx].PatternTokenAsString() +
-                                   " Result=" + str(thismatches.Matches) + "," + str(thismatches.newsqltokenidx) + "\n")
-                file_allrpt.write(s)
+                thismatches = self.MatchPatternToken(sqlidx,ppatternidx, patterntokenidx, CandidateFoundPatternIdx, pParentFoundPatternIdx)
+                if thismatches.Matches == True:
+                    MyResult.CandidateIdentifiedPattern.extend(thismatches.CandidateIdentifiedPattern)
                 moved = False
                 while (thismatches.Matches == True and
                              MyPatternList.ValidPatterns[ppatternidx].PatternTokens[patterntokenidx].IsRepeatingToken == True and
                              self.EndOfSQL(sqlidx) == False):
                     sqlidx =thismatches.newsqltokenidx
                     moved = True
-                    thismatches = self.MatchPatternToken(sqlidx,ppatternidx, patterntokenidx)
-                    s = ("Matching token SQL=" + FoundTokens[sqlidx].CsvLineFromToken() +
-                                       " Patterntoken=" + MyPatternList.ValidPatterns[ppatternidx].PatternTokens[patterntokenidx].PatternTokenAsString() +
-                                       " Result=" + str(thismatches.Matches) + "," + str(thismatches.newsqltokenidx) + "\n")
-                    file_allrpt.write(s)
+                    thismatches = self.MatchPatternToken(sqlidx,ppatternidx, patterntokenidx, CandidateFoundPatternIdx, pParentFoundPatternIdx)
+                    if thismatches.Matches == True:
+                        MyResult.CandidateIdentifiedPattern.extend(thismatches.CandidateIdentifiedPattern)
 
                 if moved == True:
                     patterntokenidx += 1
@@ -118,12 +130,9 @@ class SQLPatternMatcher:
             MyResult.Matches = True
         else:
             MyResult.Matches = False
+            LastUsedFoundPatternIdx = CandidateFoundPatternIdx - 1
+            MyResult.CandidateIdentifiedPattern.clear()
         MyResult.newsqltokenidx = sqlidx
-
-        s = ("IdentifyNextPattern SQL " + str(psqltokenidx) + " Pattern " + str(ppatternidx) +
-                                          " Match=" + str(MyResult.Matches) + " newsqlidx=" + str(MyResult.newsqltokenidx)
-                                          + "\n")
-        file_allrpt.write(s)
 
         return MyResult
     #-----------------------------------------------------------------------------------------------
@@ -133,6 +142,11 @@ class SQLPatternMatcher:
         global file_allrpt
         global FoundTokensPointer
         global MyPatternList
+        global LastUsedFoundPatternIdx
+
+        LastUsedFoundPatternIdx = -1
+
+        FoundTokensInPatterns = []
 
         FoundTokens = pFoundTokens
         file_allrpt = pReportFile
@@ -145,11 +159,34 @@ class SQLPatternMatcher:
             moved = False
             p = 0
             while p < len(MyPatternList.ValidPatterns) and moved == False:
-                result = self.IdentifyNextPattern(FoundTokensPointer, p)
+                result = self.IdentifyNextPattern(FoundTokensPointer, p, -1)
                 if result.Matches == True:
+                    FoundTokensInPatterns.extend(result.CandidateIdentifiedPattern)
                     FoundTokensPointer = result.newsqltokenidx
                     moved = True
                 p += 1
             if moved == False and p > len(MyPatternList.ValidPatterns) - 1:
                 #Now you're in an illegal syntax, but let's move on anyways
+                MySQLTokenInPattern = SQLTokenInPattern()
+                LastUsedFoundPatternIdx += 1
+                MySQLTokenInPattern.FoundPatternidx = LastUsedFoundPatternIdx
+                MySQLTokenInPattern.ParentFoundPatternidx = -1
+                MySQLTokenInPattern.originfilename = FoundTokens[FoundTokensPointer].originfilename
+                MySQLTokenInPattern.bline = FoundTokens[FoundTokensPointer].bline
+                MySQLTokenInPattern.bcol = FoundTokens[FoundTokensPointer].bcol
+                MySQLTokenInPattern.eline = FoundTokens[FoundTokensPointer].eline
+                MySQLTokenInPattern.ecol = FoundTokens[FoundTokensPointer].ecol
+                MySQLTokenInPattern.TokenType = FoundTokens[FoundTokensPointer].TokenType
+                MySQLTokenInPattern.TokenContent = FoundTokens[FoundTokensPointer].TokenContent
+                MySQLTokenInPattern.IsQuotedIdentifier = FoundTokens[FoundTokensPointer].IsQuotedIdentifier
+                FoundTokensInPatterns.append(MySQLTokenInPattern)
                 FoundTokensPointer += 1
+
+        f = 0
+
+        while f < len(FoundTokensInPatterns):
+            s = FoundTokensInPatterns[f].CsvLineFromSQLTokenInPattern() + "\n"
+            file_allrpt.write(s)
+            f += 1
+
+        return FoundTokensInPatterns

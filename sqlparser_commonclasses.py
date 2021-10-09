@@ -78,8 +78,38 @@ class PatternList:
         self.ValidPatterns.append(MyPattern)
         del MyPattern
 
+class SQLTokenInPattern:
+    def __init__(self):
+        self.PatternName = "" # Remains empty for unmatched tokens
+        self.PatternTokenidx = -1 # Remains -1 for unmatched tokens
+        self.PatternTokenInterpretation = "" # Remains empty for unmatched tokens
+        self.FoundPatternidx = -1 # Unique identifier for identified pattern instance within the file
+        self.ParentFoundPatternidx = -1 # This pattern is direct subpattern in ParentFoundPatternidx
+        self.originfilename = "" #Added for tracing and debugging purpose
+        self.bline = 0
+        self.bcol = 0
+        self.eline = 0
+        self.ecol = 0 # eline and ecol are exclusive
+        self.TokenType = ""
+        self.TokenContent = ""
+        self.IsQuotedIdentifier = False
+    
+    def CsvLineFromSQLTokenInPattern(self):
+        a = (self.PatternName + "," + str(self.PatternTokenidx) + ","
+                  + self.PatternTokenInterpretation + ","
+                  + str(self.FoundPatternidx) + "," + str(self.ParentFoundPatternidx) + ",")
+        a = a + (self.originfilename 
+                   + "," + str(self.bline) + "," + str(self.bcol) 
+                   + "," + str(self.eline) + "," + str(self.ecol) + ","
+                   + self.TokenType + ",")
+        if self.IsQuotedIdentifier == True:
+            a = a + '"' + self.TokenContent + '"'
+        else:
+            a = a + self.TokenContent
+        return a;
+
 class KeywordList:
     def __init__(self):
         self.ValidKeyWords = {"SELECT", "INSERT", "UPDATE", "CREATE",
-                              "DELETE", "FROM", "AS", "REPLACE", "OR", "CREATE", 
+                              "DELETE", "FROM", "AS", "REPLACE", "OR", 
                               "VIEW", "TABLE", "INDEX", "PARTITION"}
