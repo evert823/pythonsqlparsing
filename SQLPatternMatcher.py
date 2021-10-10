@@ -45,17 +45,19 @@ class SQLPatternMatcher:
         ptype = MyPatternList.ValidPatterns[ppatternidx].PatternTokens[ppatterntokenidx].PatternTokenType
 
         if ptype == "PATTERN":
-            subpi = 0
-            while (subpi < len(MyPatternList.ValidPatterns) and MyPatternList.ValidPatterns[subpi].PatternName !=
-                      MyPatternList.ValidPatterns[ppatternidx].PatternTokens[ppatterntokenidx].ExpressesPattern):
-                subpi += 1
-            if subpi >= len(MyPatternList.ValidPatterns):
-                print("Found invalid subpattern reference " + MyPatternList.ValidPatterns[ppatternidx].PatternTokens[ppatterntokenidx].ExpressesPattern)
-                MySubResult.Matches = False
-                MySubResult.newsqltokenidx = psqlidx + 1
-                return MySubResult
-            else:
-                return self.IdentifyNextPattern(psqlidx, subpi, pCandidateFoundPatternIdx) # INDIRECT RECURSION
+            oneofthesepatterns = MyPatternList.ValidPatterns[ppatternidx].PatternTokens[ppatterntokenidx].ExpressesPattern.split("|")
+            for p in oneofthesepatterns:
+                subpi = 0
+                while subpi < len(MyPatternList.ValidPatterns):
+                    if MyPatternList.ValidPatterns[subpi].PatternName == p:
+                        thismatches = self.IdentifyNextPattern(psqlidx, subpi, pCandidateFoundPatternIdx)
+                        if thismatches.Matches == True:
+                            return thismatches
+                    subpi += 1
+            # Apparently no match found
+            MySubResult.Matches = False
+            MySubResult.newsqltokenidx = psqlidx + 1
+            return MySubResult
         elif (ptype in ("STRINGLITERAL", "NUMBERLITERAL", "VARIABLE", "KEYWORD", "SINGLECHAR")
                         and FoundTokens[psqlidx].TokenType == ptype
                         and (FoundTokens[psqlidx].TokenContent ==

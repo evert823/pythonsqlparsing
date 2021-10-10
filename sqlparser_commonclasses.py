@@ -63,9 +63,7 @@ class PatternList:
         MyPattern.AddPatternToken("KEYWORD", "SELECT", "", "", False, False)
         MyPattern.AddPatternToken("PATTERN", "", "", "ALIASDOT", True, False)
         MyPattern.AddPatternToken("VARIABLE", "", "COLUMNNAME", "", False, False)
-        MyPattern.AddPatternToken("PATTERN", "", "", "COMMA_COLUMN", True, True)
-        MyPattern.AddPatternToken("SINGLECHAR", ",", "", "", False, False)
-        MyPattern.AddPatternToken("STRINGLITERAL", "", "", "", False, False)
+        MyPattern.AddPatternToken("PATTERN", "", "", "COMMA_COLUMN|COMMA_NUMBER|COMMA_STRING", True, True)
         MyPattern.AddPatternToken("KEYWORD", "FROM", "", "", False, False)
         MyPattern.AddPatternToken("SINGLECHAR", "(", "", "", False, False)
         MyPattern.AddPatternToken("PATTERN", "", "", "SELECTCOLUMNSFROMTABLEWHERE", False, False)
@@ -113,7 +111,7 @@ class PatternList:
         MyPattern.AddPatternToken("KEYWORD", "SELECT", "", "", False, False)
         MyPattern.AddPatternToken("PATTERN", "", "", "ALIASDOT", True, False)
         MyPattern.AddPatternToken("VARIABLE", "", "COLUMNNAME", "", False, False)
-        MyPattern.AddPatternToken("PATTERN", "", "", "COMMA_COLUMN", True, True)
+        MyPattern.AddPatternToken("PATTERN", "", "", "COMMA_COLUMN|COMMA_NUMBER|COMMA_STRING", True, True)
         MyPattern.AddPatternToken("KEYWORD", "FROM", "", "", False, False)
         MyPattern.AddPatternToken("VARIABLE", "", "SCHEMANAME", "", False, False)
         MyPattern.AddPatternToken("SINGLECHAR", ".", "", "", False, False)
@@ -243,6 +241,18 @@ class PatternList:
         MyPattern.AddPatternToken("SINGLECHAR", ",", "", "", False, False)
         MyPattern.AddPatternToken("PATTERN", "", "", "ALIASDOT", True, False)
         MyPattern.AddPatternToken("VARIABLE", "", "COLUMNNAME", "", False, False)
+        self.ValidPatterns.append(MyPattern)
+        del MyPattern
+        MyPattern = ParsePattern()
+        MyPattern.PatternName = "COMMA_NUMBER"
+        MyPattern.AddPatternToken("SINGLECHAR", ",", "", "", False, False)
+        MyPattern.AddPatternToken("NUMBERLITERAL", "", "NUMBERCONSTANT", "", False, False)
+        self.ValidPatterns.append(MyPattern)
+        del MyPattern
+        MyPattern = ParsePattern()
+        MyPattern.PatternName = "COMMA_STRING"
+        MyPattern.AddPatternToken("SINGLECHAR", ",", "", "", False, False)
+        MyPattern.AddPatternToken("STRINGLITERAL", "", "STRINGCONSTANT", "", False, False)
         self.ValidPatterns.append(MyPattern)
         del MyPattern
 
