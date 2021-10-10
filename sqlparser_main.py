@@ -27,7 +27,7 @@ def parse_one_file():
     MySQLPatternMatcher = SQLPatternMatcher()
 
     FoundTokens = MyLowLevelLinesParser.ParseLines(Lines, file_allrpt, infile)
-    MySQLPatternMatcher.SQLPatternMatcher_main(FoundTokens, file_allrpt, infile)
+    FoundTokensInPatterns = MySQLPatternMatcher.SQLPatternMatcher_main(FoundTokens, file_allrpt, infile)
 
     file2 = open(outfile, 'w')
     file2.write(myheader)
