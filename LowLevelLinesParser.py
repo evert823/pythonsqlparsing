@@ -24,7 +24,7 @@ class LowLevelLinesParser:
         MyToken.eline = currentlinenumber
         MyToken.ecol = currentcolumnnumber
         if pelttype == "WORD":
-            if pcontent in MyKeywordList.ValidKeyWords:
+            if pcontent.upper() in MyKeywordList.ValidKeyWords:
                 MyToken.TokenType = "KEYWORD"
             else:
                 MyToken.TokenType = "VARIABLE"
@@ -33,7 +33,10 @@ class LowLevelLinesParser:
             MyToken.IsQuotedIdentifier = True
         else:
             MyToken.TokenType = pelttype
-        MyToken.TokenContent = pcontent
+        if MyToken.TokenType == "KEYWORD":
+            MyToken.TokenContent = pcontent.upper()
+        else:
+            MyToken.TokenContent = pcontent
         FoundTokens.append(MyToken)
         if ReportAllElements == True:
             file_allrpt.write(MyToken.CsvLineFromToken() + "\n")
@@ -97,10 +100,22 @@ class LowLevelLinesParser:
                 currentcolumnnumber = 0
             else:
                 currentcolumnnumber = currentcolumnnumber + col + 2
+
+                #content multiline comment
+                l = prevline
+                c = prevcol
+                strcontent = ""
+                while l < currentlinenumber:
+                    strcontent = strcontent + Lines[l][c:]
+                    l += 1
+                    c = 0
+                strcontent = strcontent + Lines[currentlinenumber][c:currentcolumnnumber]
+                #content multiline comment
+
                 if self.EndOfLineReached():
                     currentlinenumber += 1
                     currentcolumnnumber = 0
-                self.InterpretElement(prevline, prevcol, "MULTILINECOMMENT", "")
+                self.InterpretElement(prevline, prevcol, "MULTILINECOMMENT", strcontent)
                 MultiLineCommentStarted = False
     #-----------------------------------------------------------------------------------------------
     def IdentifyNextSingleLineComment(self):
@@ -113,12 +128,13 @@ class LowLevelLinesParser:
         elif currentcolumnnumber > len(Lines[currentlinenumber]) - 2:
             pass
         elif Lines[currentlinenumber][currentcolumnnumber:currentcolumnnumber + 2] == "--":
+            strcontent = Lines[currentlinenumber][currentcolumnnumber:].replace("\n", "")
             moved = True
             prevline = currentlinenumber
             prevcol = currentcolumnnumber
             currentlinenumber += 1
             currentcolumnnumber = 0
-            self.InterpretElement(prevline, prevcol, "SINGLELINECOMMENT", "")
+            self.InterpretElement(prevline, prevcol, "SINGLELINECOMMENT", strcontent)
         else:
             pass
     #-----------------------------------------------------------------------------------------------
@@ -266,7 +282,7 @@ class LowLevelLinesParser:
                     moved = True
                     prevline = currentlinenumber
                     prevcol = currentcolumnnumber
-                    eltcontent = Lines[currentlinenumber][currentcolumnnumber:currentcolumnnumber + b[1]].upper()
+                    eltcontent = Lines[currentlinenumber][currentcolumnnumber:currentcolumnnumber + b[1]]
                     currentcolumnnumber = currentcolumnnumber + b[1]
                     if self.EndOfLineReached():
                         currentlinenumber += 1
@@ -321,7 +337,7 @@ class LowLevelLinesParser:
 
         MyKeywordList = KeywordList()
         
-        ReportAllElements = False
+        ReportAllElements = True
         Lines = pLines
         file_allrpt = pReportFile
         infile = pInputFileName
