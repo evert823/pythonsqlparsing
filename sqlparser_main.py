@@ -82,8 +82,15 @@ def write_new_file_from_FoundTokens(pFoundTokens, poutfile):
         if currentcolumnnumber == 0:
             file2.write("\n")
 
-    file2.close()
+    l_e = len(Lines) - 1
+    c_e = len(Lines[l_e]) - 1
 
+    while currentlinenumber < l_e:
+        file2.write(Lines[currentlinenumber][currentcolumnnumber:])
+        currentlinenumber += 1
+        currentcolumnnumber = 0
+
+    file2.close()
 #-----------------------------------------------------------------------------------------------
 def parse_one_file():
     # Lines will be accessed in other functions
