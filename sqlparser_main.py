@@ -34,6 +34,7 @@ def AlterSQL(pFoundTokens):
                     ff_multiset = ff
                 elif pFoundTokens[ff].TokenContent == "VOLATILE":
                     ParseStatus = "volatile003"
+                    ff_multiset = ff
                 else:
                     ParseStatus = "volatile000"
             else:
@@ -50,9 +51,10 @@ def AlterSQL(pFoundTokens):
                 ParseStatus = "volatile000"
         elif ParseStatus == "volatile004":
             if ff_multiset > -1:
-                pFoundTokens[ff_multiset].TokenContent = "SET"
-            else:
-                pFoundTokens[ff - 2].TokenContent = "SET VOLATILE"
+                if pFoundTokens[ff_multiset].TokenContent == "MULTISET":
+                   pFoundTokens[ff_multiset].TokenContent = "SET"
+                elif pFoundTokens[ff_multiset].TokenContent == "VOLATILE":
+                   pFoundTokens[ff_multiset].TokenContent = "SET VOLATILE"
             ParseStatus = "volatile000"
 #-----------------------------------------------------------------------------------------------
 def write_new_file_from_FoundTokens(pFoundTokens, poutfile):
@@ -60,7 +62,7 @@ def write_new_file_from_FoundTokens(pFoundTokens, poutfile):
     currentcolumnnumber = 0
 
     file2 = open(poutfile, 'w')
-    file2.write(myheader)
+    #file2.write(myheader)
 
     for ff in range(len(pFoundTokens)):
         while currentlinenumber < pFoundTokens[ff].bline:
