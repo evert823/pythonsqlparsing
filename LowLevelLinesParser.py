@@ -1,14 +1,4 @@
 # 
-# August 2021 Evert Jan Karman / evert823 / project to parse SQL using Python
-# Class LowLevelLinesParser has the methods to break down the raw input code into comments, string and number literals, words
-# and remaining key characters
-# 
-# From outside, call the ParseLines method with arguments (Lines, ReportFile, InputFileName)
-# - Lines = list of strings resulting from yourfile.readlines()
-# - ReportFile = an parsing report file object already open for write
-# - InputFileName = a filename representing the input file from which the parsed code is coming
-# 
-# Method ParseLines returns a list of SQLTokens (see common classes)
 # 
 import re
 from sqlparser_commonclasses import SQLToken

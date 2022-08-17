@@ -7,7 +7,6 @@ import sys
 from datetime import datetime
 from LowLevelLinesParser import LowLevelLinesParser
 from sqlparser_commonclasses import SQLToken
-from SQLPatternMatcher import SQLPatternMatcher
 # from typing import ContextManager
 
 #-----------------------------------------------------------------------------------------------
@@ -15,47 +14,42 @@ def emulatestring(pstrcontent):
     return "'" + pstrcontent.replace("'", "''") + "'"
 #-----------------------------------------------------------------------------------------------
 def AlterSQL(pFoundTokens):
-    #For now this is written for a scenario where SET property must be enforced for volatile tables
-    ParseStatus = "volatile000"
     for ff in range(len(pFoundTokens)):
         if pFoundTokens[ff].TokenType == "MULTILINECOMMENT":
             continue
         if pFoundTokens[ff].TokenType == "SINGLELINECOMMENT":
             continue
-        if ParseStatus == "volatile000":
-            ff_multiset = -1
-            if pFoundTokens[ff].TokenType == "KEYWORD":
-                if pFoundTokens[ff].TokenContent == "CREATE":
-                    ParseStatus = "volatile001"
-        elif ParseStatus == "volatile001":
-            if pFoundTokens[ff].TokenType == "KEYWORD":
-                if pFoundTokens[ff].TokenContent == "MULTISET":
-                    ParseStatus = "volatile002"
-                    ff_multiset = ff
-                elif pFoundTokens[ff].TokenContent == "VOLATILE":
-                    ParseStatus = "volatile003"
-                    ff_multiset = ff
-                else:
-                    ParseStatus = "volatile000"
+
+        Next10Tokens = ""
+        RealStatement = ""
+        ff2 = ff
+        snum = 0
+        while ff2 < len(pFoundTokens) and snum < 11:
+            if pFoundTokens[ff2].TokenType == "MULTILINECOMMENT":
+                ff2 += 1
+            elif pFoundTokens[ff2].TokenType == "SINGLELINECOMMENT":
+                ff2 += 1
+            elif pFoundTokens[ff2].TokenType == "KEYWORD":
+                Next10Tokens += pFoundTokens[ff2].TokenContent + " "
+                RealStatement += pFoundTokens[ff2].TokenContent + " "
+                snum += 1
+                ff2 += 1
+            elif pFoundTokens[ff2].TokenType == "VARIABLE":
+                Next10Tokens += pFoundTokens[ff2].TokenType + " "
+                RealStatement += pFoundTokens[ff2].TokenContent + " "
+                snum += 1
+                ff2 += 1
+            elif pFoundTokens[ff2].TokenType == "SINGLECHAR":
+                Next10Tokens += pFoundTokens[ff2].TokenContent + " "
+                RealStatement += pFoundTokens[ff2].TokenContent + " "
+                snum += 1
+                ff2 += 1
             else:
-                ParseStatus = "volatile000"
-        elif ParseStatus == "volatile002":
-            if pFoundTokens[ff].TokenType == "KEYWORD" and pFoundTokens[ff].TokenContent == "VOLATILE":
-                ParseStatus = "volatile003"
-            else:
-                ParseStatus = "volatile000"
-        elif ParseStatus == "volatile003":
-            if pFoundTokens[ff].TokenType == "KEYWORD" and pFoundTokens[ff].TokenContent == "TABLE":
-                ParseStatus = "volatile004"
-            else:
-                ParseStatus = "volatile000"
-        elif ParseStatus == "volatile004":
-            if ff_multiset > -1:
-                if pFoundTokens[ff_multiset].TokenContent == "MULTISET":
-                   pFoundTokens[ff_multiset].TokenContent = "SET"
-                elif pFoundTokens[ff_multiset].TokenContent == "VOLATILE":
-                   pFoundTokens[ff_multiset].TokenContent = "SET VOLATILE"
-            ParseStatus = "volatile000"
+                ff2 += 1
+        
+        if Next10Tokens == "CREATE SET VOLATILE TABLE VARIABLE AS ( WITH VARIABLE AS ( ":
+            s = pFoundTokens[ff].CsvLineFromToken()
+            print(s + " " + RealStatement)
 #-----------------------------------------------------------------------------------------------
 def write_new_file_from_FoundTokens(pFoundTokens, poutfile):
     currentlinenumber = 0
@@ -102,10 +96,8 @@ def parse_one_file():
     file1.close()
 
     MyLowLevelLinesParser = LowLevelLinesParser()
-    MySQLPatternMatcher = SQLPatternMatcher()
 
     FoundTokens = MyLowLevelLinesParser.ParseLines(Lines, file_lll_rpt, infile)
-    FoundTokensInPatterns = MySQLPatternMatcher.SQLPatternMatcher_main(FoundTokens, file_spm_rpt, infile)
 
     AlterSQL(FoundTokens)
     write_new_file_from_FoundTokens(FoundTokens, outfile)
@@ -151,15 +143,11 @@ def process_folders():
     global infile
     global outfile
     global file_lll_rpt
-    global file_spm_rpt
 
     file_lll_rpt_name = outfolder + "/" + sys.argv[0] + "_lll.report"
     file_lll_rpt = open(file_lll_rpt_name, 'w')
     file_lll_rpt.write(infolder + ",0,0,0,0," + "MESSAGE,WARNING linenumbers and columnnumbers in this report are zero-based\n")
 
-    file_spm_rpt_name = outfolder + "/" + sys.argv[0] + "_spm.report"
-    file_spm_rpt = open(file_spm_rpt_name, 'w')
-    file_spm_rpt.write(",0,,0,0," + infolder + ",0,0,0,0," + "MESSAGE,WARNING linenumbers and columnnumbers in this report are zero-based\n")
 
     for root, subdirectories, files in os.walk(infolder):
         for file in files:
@@ -167,7 +155,6 @@ def process_folders():
             outfile = infile.replace(infolder, outfolder)
             parse_one_file()
     file_lll_rpt.close()
-    file_spm_rpt.close()
 #-----------------------------------------------------------------------------------------------
 
 now = datetime.now()
