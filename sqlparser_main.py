@@ -73,6 +73,11 @@ def parse_one_file():
     FoundStatements = MyStatementHandler.BuildStatements(FoundTokens)
 
     AlterSQL(FoundTokens, FoundStatements)
+
+    vt = MyStatementHandler.FindVolatileTables(FoundStatements)
+    for s in vt:
+        print(infile + "|" + s)
+    
     write_new_file_from_FoundTokens(FoundTokens, outfile)
 
     write_clean_file(FoundStatements, outfile_clean)
@@ -102,6 +107,7 @@ def prepare_folders(GetUserConfirmation):
             sys.exit()
         try:
             shutil.rmtree(outfolder)
+            shutil.rmtree(cleanfolder)
         except OSError as e:
             print("Error: %s : %s" % (outfolder, e.strerror))
 
