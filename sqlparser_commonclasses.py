@@ -20,6 +20,30 @@ class SQLToken:
             a = a + self.TokenContent
         return a;
 
+    def PatternContent(self):
+        if self.TokenType in ["KEYWORD", "SINGLECHAR"]:
+            return self.TokenContent
+        else:
+            return self.TokenType
+
+    def CleanContent(self):
+        if self.TokenType in ["STRINGLITERAL"]:
+            return "'" + self.TokenContent.replace("'", "''") + "'"
+        elif self.TokenType in ["VARIABLE"] and self.IsQuotedIdentifier == True:
+            return '"' + self.TokenContent + '"'
+        else:
+            return self.TokenContent
+
+class SQLStatement:
+    def __init__(self):
+        self.b_i = -1 #inclusive
+        self.e_i = -1 #exclusive
+        self.alltokens = []
+        self.tokens = [] #all tokens without the comments
+        self.StatementPattern = ""
+        self.CleanStatement = ""
+
+
 class KeywordList:
     def __init__(self):
         self.ValidKeyWords = {"SELECT", "INSERT", "UPDATE", "CREATE",
@@ -30,4 +54,4 @@ class KeywordList:
                               "IF", "ERRORCODE", "THEN", "GOTO", "ON", "COMMIT",
                               "PRESERVE", "ROWS", "NOT", "NULL", "SUBSTR", "CASE", "WHEN",
                               "END", "COALESCE", "TO_DATE", "CAST", "BETWEEN",
-                              "INTO", "COLLECT", "STATISTICS", "COLUMN", "QUIT", "LABEL"}
+                              "INTO", "COLLECT", "STATISTICS", "COLUMN", "QUIT", "LABEL", "VALUES"}

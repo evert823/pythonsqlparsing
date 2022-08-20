@@ -327,7 +327,7 @@ class LowLevelLinesParser:
 
         MyKeywordList = KeywordList()
         
-        ReportAllElements = True
+        ReportAllElements = False
         Lines = pLines
         file_allrpt = pReportFile
         infile = pInputFileName

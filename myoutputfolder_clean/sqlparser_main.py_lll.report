@@ -1,0 +1,12 @@
+./myinputfolder,0,0,0,0,MESSAGE,WARNING linenumbers and columnnumbers in this report are zero-based
+./myinputfolder\enforce_set_volatile.sql,0,0,0,0,MESSAGE,start parsing file
+./myinputfolder\FINDSETWITHEXAMPLE.sql,0,0,0,0,MESSAGE,start parsing file
+./myinputfolder\generaltestcase.sql,0,0,0,0,MESSAGE,start parsing file
+./myinputfolder\illegalchar.sql,0,0,0,0,MESSAGE,start parsing file
+./myinputfolder\multilinecommentstestcase.sql,0,0,0,0,MESSAGE,start parsing file
+./myinputfolder\numberliteraltestcase.sql,0,0,0,0,MESSAGE,start parsing file
+./myinputfolder\patternstestcase.sql,0,0,0,0,MESSAGE,start parsing file
+./myinputfolder\quotedidentifiertestcase.sql,0,0,0,0,MESSAGE,start parsing file
+./myinputfolder\singlelinecommentstestcase.sql,0,0,0,0,MESSAGE,start parsing file
+./myinputfolder\stringliteraltestcase.sql,0,0,0,0,MESSAGE,start parsing file
+./myinputfolder\wordtestcase.sql,0,0,0,0,MESSAGE,start parsing file
