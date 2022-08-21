@@ -261,7 +261,7 @@ class LowLevelLinesParser:
         if self.EndOfFileReached():
             pass
         else:
-            a = re.search("[a-z|A-Z|_][0-9|a-z|A-Z|_]*", Lines[currentlinenumber][currentcolumnnumber:])
+            a = re.search("[a-z|A-Z|_|#][0-9|a-z|A-Z|_|#]*", Lines[currentlinenumber][currentcolumnnumber:])
             try:
                 b = a.span()
             except:

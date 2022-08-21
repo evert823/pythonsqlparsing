@@ -51,7 +51,7 @@ class NewInserts:
 
 class KeywordList:
     def __init__(self):
-        self.ValidKeyWords = {"SELECT", "INSERT", "UPDATE", "CREATE",
+        self.ValidKeyWords = {"SELECT", "INSERT", "UPDATE", "CREATE", "ALL",
                               "DELETE", "FROM", "AS", "REPLACE", "OR", 
                               "VIEW", "TABLE", "PRIMARY", "INDEX", "PARTITION",
                               "SET", "ERROROUT", "STDOUT", "AND", "WHERE",
@@ -59,4 +59,7 @@ class KeywordList:
                               "IF", "ERRORCODE", "THEN", "GOTO", "ON", "COMMIT",
                               "PRESERVE", "ROWS", "NOT", "NULL", "SUBSTR", "CASE", "WHEN",
                               "END", "COALESCE", "TO_DATE", "CAST", "BETWEEN",
-                              "INTO", "COLLECT", "STATISTICS", "STATS", "COLUMN", "QUIT", "LABEL", "VALUES"}
+                              "INTO", "COLLECT", "STATISTICS", "STATS", "COLUMN", "QUIT", "LABEL", "VALUES", "MERGE",
+                              "INNER", "LEFT", "RIGHT", "FULL", "OUTER", "JOIN", "DISTINCT", "ORDER",
+                              "OVER", "ELSE", "MAX", "MIN", "RANK", "ROW_NUMBER", "TRIM", "USER", "CURRENT_TIMESTAMP", "SESSION",
+                              "SAMPLE"}
