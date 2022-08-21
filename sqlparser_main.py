@@ -44,8 +44,15 @@ def write_new_file_from_FoundTokens(pFoundTokens, poutfile):
 
         currentlinenumber = pFoundTokens[ff].eline
         currentcolumnnumber = pFoundTokens[ff].ecol
+
         if currentcolumnnumber == 0:
             file2.write("\n")
+
+        for n in NewInserts:
+            if n.aftertoken == ff:
+                file2.write("\n")
+                for s in n.insertlines:
+                    file2.write(s + "\n")
 
     l_e = len(Lines) - 1
     c_e = len(Lines[l_e]) - 1
@@ -60,7 +67,10 @@ def write_new_file_from_FoundTokens(pFoundTokens, poutfile):
 def parse_one_file():
     # Lines will be accessed in other functions
     global Lines
+    global NewInserts
     global moved
+
+    NewInserts = []
 
     file1 = open(infile, 'r')
     Lines = file1.readlines()
@@ -72,11 +82,17 @@ def parse_one_file():
     FoundTokens = MyLowLevelLinesParser.ParseLines(Lines, file_lll_rpt, infile)
     FoundStatements = MyStatementHandler.BuildStatements(FoundTokens)
 
-    AlterSQL(FoundTokens, FoundStatements)
+    #AlterSQL(FoundTokens, FoundStatements)
 
-    vt = MyStatementHandler.FindVolatileTables(FoundStatements)
-    for s in vt:
-        print(infile + "|" + s)
+    vt1 = MyStatementHandler.FindVolatileTables(FoundStatements)
+    vt2 = MyStatementHandler.FindCollectStatsOnVolatileTables(FoundStatements)
+
+    for s in vt1:
+        if s not in vt2:
+            print(infile + "|" + s + "| Trying to add statistics")
+            MyNewInsert = MyStatementHandler.AddStatsForVolatileTable(FoundTokens, FoundStatements, s)
+            if MyNewInsert.aftertoken > -1:
+                NewInserts.append(MyNewInsert)
     
     write_new_file_from_FoundTokens(FoundTokens, outfile)
 

@@ -44,6 +44,11 @@ class SQLStatement:
         self.CleanStatement = ""
 
 
+class NewInserts:
+    def __init__(self):
+        self.aftertoken = -1
+        self.insertlines = []
+
 class KeywordList:
     def __init__(self):
         self.ValidKeyWords = {"SELECT", "INSERT", "UPDATE", "CREATE",
@@ -54,4 +59,4 @@ class KeywordList:
                               "IF", "ERRORCODE", "THEN", "GOTO", "ON", "COMMIT",
                               "PRESERVE", "ROWS", "NOT", "NULL", "SUBSTR", "CASE", "WHEN",
                               "END", "COALESCE", "TO_DATE", "CAST", "BETWEEN",
-                              "INTO", "COLLECT", "STATISTICS", "COLUMN", "QUIT", "LABEL", "VALUES"}
+                              "INTO", "COLLECT", "STATISTICS", "STATS", "COLUMN", "QUIT", "LABEL", "VALUES"}
