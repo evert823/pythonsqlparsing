@@ -42,6 +42,8 @@ class SQLStatement:
         self.tokens = [] #all tokens without the comments
         self.StatementPattern = ""
         self.CleanStatement = ""
+        self.ParentStatement = -1
+        self.NestedLevel = 0
 
 
 class NewInserts:
@@ -57,9 +59,9 @@ class KeywordList:
                               "SET", "ERROROUT", "STDOUT", "AND", "WHERE",
                               "MULTISET", "VOLATILE", "WITH", "DATA", "GROUP", "BY",
                               "IF", "ERRORCODE", "THEN", "GOTO", "ON", "COMMIT",
-                              "PRESERVE", "ROWS", "NOT", "NULL", "SUBSTR", "CASE", "WHEN",
+                              "PRESERVE", "ROWS", "NOT", "IS", "NULL", "SUBSTR", "CASE", "WHEN",
                               "END", "COALESCE", "TO_DATE", "CAST", "BETWEEN",
                               "INTO", "COLLECT", "STATISTICS", "STATS", "COLUMN", "QUIT", "LABEL", "VALUES", "MERGE",
                               "INNER", "LEFT", "RIGHT", "FULL", "OUTER", "JOIN", "DISTINCT", "ORDER",
                               "OVER", "ELSE", "MAX", "MIN", "RANK", "ROW_NUMBER", "TRIM", "USER", "CURRENT_TIMESTAMP", "SESSION",
-                              "SAMPLE"}
+                              "SAMPLE", "DROP", "QUIT", "BT", "ET", "DATABASE", "ALTER", }

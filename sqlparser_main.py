@@ -11,13 +11,6 @@ from sqlparser_commonclasses import SQLToken
 # from typing import ContextManager
 
 #-----------------------------------------------------------------------------------------------
-def AlterSQL(pFoundTokens, pFoundStatements):
-    for i in range(len(pFoundStatements)):
-        if pFoundStatements[i].StatementPattern[0:59] == "CREATE SET VOLATILE TABLE VARIABLE AS ( WITH VARIABLE AS ( ":
-            ft = pFoundStatements[i].b_i
-            s = pFoundTokens[ft].CsvLineFromToken()
-            print(s + " " + pFoundStatements[i].CleanStatement)
-#-----------------------------------------------------------------------------------------------
 def write_clean_file(pFoundStatements, poutfile):
     file2 = open(poutfile, 'w')
 
@@ -81,18 +74,29 @@ def parse_one_file():
 
     FoundTokens = MyLowLevelLinesParser.ParseLines(Lines, file_lll_rpt, infile)
     FoundStatements = MyStatementHandler.BuildStatements(FoundTokens)
+    MySubqueryTree = MyStatementHandler.BuildSubqueryTree(FoundTokens, FoundStatements)
+    for sq in MySubqueryTree:
+        ft = sq.tokens[0]
+        Message = FoundTokens[ft].CsvLineFromToken()
+        Message += " IS SUBQUERY IN "
+        if sq.ParentStatement > -1:
+            ft_parent = MySubqueryTree[sq.ParentStatement].tokens[0]
+            Message += FoundTokens[ft_parent].CsvLineFromToken()
+        Message += " NestedLevel : " + str(sq.NestedLevel)
+        if sq.NestedLevel > 0:
+            print(Message)
 
-    #AlterSQL(FoundTokens, FoundStatements)
+#    MyStatementHandler.FindFirstStatements(FoundTokens, FoundStatements, file_lll_rpt)
 
-    vt1 = MyStatementHandler.FindVolatileTables(FoundStatements)
-    vt2 = MyStatementHandler.FindCollectStatsOnVolatileTables(FoundStatements)
+#    vt1 = MyStatementHandler.FindVolatileTables(FoundStatements)
+#    vt2 = MyStatementHandler.FindCollectStatsOnVolatileTables(FoundStatements)
 
-    for s in vt1:
-        if s not in vt2:
-            print(infile + "|" + s + "| Trying to add statistics")
-            MyNewInsert = MyStatementHandler.AddStatsForVolatileTable(FoundTokens, FoundStatements, s)
-            if MyNewInsert.aftertoken > -1:
-                NewInserts.append(MyNewInsert)
+#    for s in vt1:
+#        if s not in vt2:
+#            print(infile + "|" + s + "| Trying to add statistics")
+#            MyNewInsert = MyStatementHandler.AddStatsForVolatileTable(FoundTokens, FoundStatements, s)
+#            if MyNewInsert.aftertoken > -1:
+#                NewInserts.append(MyNewInsert)
     
     write_new_file_from_FoundTokens(FoundTokens, outfile)
 
