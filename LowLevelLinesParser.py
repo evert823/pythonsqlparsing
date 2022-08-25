@@ -17,10 +17,10 @@ class LowLevelLinesParser:
             if pcontent.upper() in MyKeywordList.ValidKeyWords:
                 MyToken.TokenType = "KEYWORD"
             else:
-                MyToken.TokenType = "VARIABLE"
-        elif pelttype == "QUOTEDIDENTIFIER":
-            MyToken.TokenType = "VARIABLE"
-            MyToken.IsQuotedIdentifier = True
+                MyToken.TokenType = "IDENTIFIER"
+        elif pelttype == "LIMITEDIDENTIFIER":
+            MyToken.TokenType = "IDENTIFIER"
+            MyToken.IsLimitedIdentifier = True
         else:
             MyToken.TokenType = pelttype
         if MyToken.TokenType == "KEYWORD":
@@ -184,25 +184,25 @@ class LowLevelLinesParser:
                 self.InterpretElement(prevline, prevcol, "STRINGLITERAL", strcontent)
                 StringLiteralStarted = False
     #-----------------------------------------------------------------------------------------------
-    def IdentifyNextQuotedIdentifier(self):
+    def IdentifyNextLimitedIdentifier(self):
         global currentlinenumber
         global currentcolumnnumber
         global moved
-        QuotedIdentifierStarted = False
+        LimitedIdentifierStarted = False
         self.GoNextNonEmpty()
         if self.EndOfFileReached():
             pass
         elif Lines[currentlinenumber][currentcolumnnumber] == '"':
-            QuotedIdentifierStarted = True
+            LimitedIdentifierStarted = True
             moved = True
             prevline = currentlinenumber
             prevcol = currentcolumnnumber
         else:
             pass
     
-        if QuotedIdentifierStarted == True:
+        if LimitedIdentifierStarted == True:
             currentcolumnnumber += 1
-        while QuotedIdentifierStarted == True and not self.EndOfFileReached():
+        while LimitedIdentifierStarted == True and not self.EndOfFileReached():
             if self.EndOfLineReached():
                 currentlinenumber += 1
                 currentcolumnnumber = 0
@@ -224,8 +224,8 @@ class LowLevelLinesParser:
                 if self.EndOfLineReached():
                     currentlinenumber += 1
                     currentcolumnnumber = 0
-                self.InterpretElement(prevline, prevcol, "QUOTEDIDENTIFIER", strcontent)
-                QuotedIdentifierStarted = False
+                self.InterpretElement(prevline, prevcol, "LIMITEDIDENTIFIER", strcontent)
+                LimitedIdentifierStarted = False
     #-----------------------------------------------------------------------------------------------
     def IdentifyNextNumberLiteral(self):
         global currentlinenumber
@@ -350,7 +350,7 @@ class LowLevelLinesParser:
             if moved == False and self.EndOfFileReached() == False:
                 self.IdentifyNextStringLiteral()
             if moved == False and self.EndOfFileReached() == False:
-                self.IdentifyNextQuotedIdentifier()
+                self.IdentifyNextLimitedIdentifier()
             if moved == False and self.EndOfFileReached() == False:
                 self.IdentifyNextNumberLiteral()
             if moved == False and self.EndOfFileReached() == False:

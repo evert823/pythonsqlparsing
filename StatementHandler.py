@@ -18,7 +18,7 @@ class StatementHandler:
 #-----------------------------------------------------------------------------------------------
     def AlterSQL(self, pFoundTokens, pFoundStatements):
         for i in range(len(pFoundStatements)):
-            if pFoundStatements[i].StatementPattern[0:59] == "CREATE SET VOLATILE TABLE VARIABLE AS ( WITH VARIABLE AS ( ":
+            if pFoundStatements[i].StatementPattern[0:59] == "CREATE SET VOLATILE TABLE IDENTIFIER AS ( WITH IDENTIFIER AS ( ":
                 ft = pFoundStatements[i].b_i
                 s = pFoundTokens[ft].CsvLineFromToken()
                 print(s + " " + pFoundStatements[i].CleanStatement)

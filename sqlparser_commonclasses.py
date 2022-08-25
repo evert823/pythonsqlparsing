@@ -7,14 +7,14 @@ class SQLToken:
         self.ecol = 0 # eline and ecol are exclusive
         self.TokenType = ""
         self.TokenContent = ""
-        self.IsQuotedIdentifier = False
+        self.IsLimitedIdentifier = False
     
     def CsvLineFromToken(self):
         a = (self.originfilename 
                    + "," + str(self.bline) + "," + str(self.bcol) 
                    + "," + str(self.eline) + "," + str(self.ecol) + ","
                    + self.TokenType + ",")
-        if self.IsQuotedIdentifier == True:
+        if self.IsLimitedIdentifier == True:
             a = a + '"' + self.TokenContent + '"'
         else:
             a = a + self.TokenContent
@@ -29,7 +29,7 @@ class SQLToken:
     def CleanContent(self):
         if self.TokenType in ["STRINGLITERAL"]:
             return "'" + self.TokenContent.replace("'", "''") + "'"
-        elif self.TokenType in ["VARIABLE"] and self.IsQuotedIdentifier == True:
+        elif self.TokenType in ["IDENTIFIER"] and self.IsLimitedIdentifier == True:
             return '"' + self.TokenContent + '"'
         else:
             return self.TokenContent
