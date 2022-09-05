@@ -261,7 +261,9 @@ class LowLevelLinesParser:
         if self.EndOfFileReached():
             pass
         else:
-            a = re.search("[a-z|A-Z|_|#][0-9|a-z|A-Z|_|#]*", Lines[currentlinenumber][currentcolumnnumber:])
+            #a = re.search("[a-z|A-Z|_|#][0-9|a-z|A-Z|_|#]*", Lines[currentlinenumber][currentcolumnnumber:])
+            #Now we allow curly braces in identifiers because, as common practice, they occur in parametrized schemanames
+            a = re.search("[a-z|A-Z|_|#|{|}][0-9|a-z|A-Z|_|#|{|}]*", Lines[currentlinenumber][currentcolumnnumber:])
             try:
                 b = a.span()
             except:
@@ -287,7 +289,7 @@ class LowLevelLinesParser:
         if self.EndOfFileReached():
             pass
         else:
-            if Lines[currentlinenumber][currentcolumnnumber] in ('"', '{', '}', '[', ']', '?', '.', '*', '(', ')', ',', '-', '+', '/', '\\', '<', '>', '!', '=', '|', ';'):
+            if Lines[currentlinenumber][currentcolumnnumber] in ('[', ']', '?', '.', '*', '(', ')', ',', '-', '+', '/', '\\', '<', '>', '!', '=', '|', ';'):
                 moved = True
                 prevline = currentlinenumber
                 prevcol = currentcolumnnumber

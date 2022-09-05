@@ -2,6 +2,12 @@ from sqlparser_commonclasses import SQLToken
 from sqlparser_commonclasses import SQLStatement
 from sqlparser_commonclasses import NewInserts
 
+#
+# 1st abstraction level = CleanStatement: comments removed, whitespaces and line-ends standardized
+# 2nd abstraction level = Instances of string literals, number literals, identifiers represented as "STRINGLITERAL", "NUMBERLITERAL", "IDENTIFIER"
+# 3rd abstraction level = Instances of subqueries represented as "SUBQUERY", symantically equivalent keywords mappped together
+#
+
 class StatementHandler:
 #-----------------------------------------------------------------------------------------------
     def FindFirstStatements(self, pFoundTokens, pFoundStatements, file_lll_rpt):
@@ -18,7 +24,7 @@ class StatementHandler:
 #-----------------------------------------------------------------------------------------------
     def AlterSQL(self, pFoundTokens, pFoundStatements):
         for i in range(len(pFoundStatements)):
-            if pFoundStatements[i].StatementPattern[0:61] == "CREATE SET VOLATILE TABLE IDENTIFIER AS ( WITH IDENTIFIER AS ( ":
+            if pFoundStatements[i].Abstraction02[0:59] == "CREATE SET VOLATILE TABLE IDENTIFIER AS ( WITH IDENTIFIER AS ( ":
                 ft = pFoundStatements[i].b_i
                 s = pFoundTokens[ft].CsvLineFromToken()
                 print(s + " " + pFoundStatements[i].CleanStatement)
@@ -87,6 +93,30 @@ class StatementHandler:
                 volatiletables.append(s.CleanStatement[c1:c1 + c2].upper())
         return volatiletables
 #-----------------------------------------------------------------------------------------------
+    def BuildAbstraction03(self, pFoundTokens, pSubqueryTree):
+        #Here we represent a subquery by "SUBQUERY"
+        for stnr in range(len(pSubqueryTree)):
+            cursor = pSubqueryTree[stnr].b_i
+            stnr2 = stnr + 1
+
+            while cursor < pSubqueryTree[stnr].e_i:
+                while stnr2 < len(pSubqueryTree) and pSubqueryTree[stnr2].ParentStatement != stnr:
+                    stnr2 += 1
+                if stnr2 >= len(pSubqueryTree):
+                    for i in range(cursor, pSubqueryTree[stnr].e_i):
+                        if i in pSubqueryTree[stnr].tokens:
+                            pSubqueryTree[stnr].Abstraction03 += pFoundTokens[i].PatternContent() + " "
+                    cursor = pSubqueryTree[stnr].e_i
+                else:
+                    for i in range(cursor, pSubqueryTree[stnr2].b_i):
+                        if i in pSubqueryTree[stnr].tokens:
+                            pSubqueryTree[stnr].Abstraction03 += pFoundTokens[i].PatternContent() + " "
+                    pSubqueryTree[stnr].Abstraction03 += "SUBQUERY "
+                    cursor = pSubqueryTree[stnr2].e_i
+                    stnr2 += 1
+        #Next to be implemented here: semantically interchangeable keywords to be represented by one common tag.
+        #E.g. MIN() and MAX(), or LOWER() and UPPER()
+#-----------------------------------------------------------------------------------------------
     def IdentifySubqueries(self, pFoundTokens, pSubqueryTree, pparentnr):
         i = 0
         while i < len(pSubqueryTree[pparentnr].tokens) - 1:
@@ -123,7 +153,7 @@ class StatementHandler:
                         for ft in pSubqueryTree[pparentnr].tokens:
                             if ft in range(mysq.b_i, mysq.e_i):
                                 mysq.tokens.append(ft)
-                                mysq.StatementPattern += pFoundTokens[ft].PatternContent() + " "
+                                mysq.Abstraction02 += pFoundTokens[ft].PatternContent() + " "
                                 mysq.CleanStatement += pFoundTokens[ft].CleanContent() + " "
                         mysq.ParentStatement = pparentnr
                         mysq.NestedLevel = pSubqueryTree[pparentnr].NestedLevel + 1
@@ -158,7 +188,7 @@ class StatementHandler:
                 pass
             else:
                 s.tokens.append(i)
-                s.StatementPattern += pFoundTokens[i].PatternContent() + " "
+                s.Abstraction02 += pFoundTokens[i].PatternContent() + " "
                 s.CleanStatement += pFoundTokens[i].CleanContent() + " "
             if pFoundTokens[i].TokenType == "SINGLECHAR" and pFoundTokens[i].TokenContent == ";":
                 s.e_i = i + 1 #e_i is exclusive

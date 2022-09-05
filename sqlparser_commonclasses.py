@@ -40,8 +40,9 @@ class SQLStatement:
         self.e_i = -1 #exclusive
         self.alltokens = []
         self.tokens = [] #all tokens without the comments
-        self.StatementPattern = ""
         self.CleanStatement = ""
+        self.Abstraction02 = ""
+        self.Abstraction03 = ""
         self.ParentStatement = -1
         self.NestedLevel = 0
 

@@ -15,7 +15,7 @@ def write_clean_file(pFoundStatements, poutfile):
     file2 = open(poutfile, 'w')
 
     for s in pFoundStatements:
-        file2.write("-- " + s.StatementPattern + "\n")
+        file2.write("-- " + s.Abstraction02 + "\n")
         file2.write(s.CleanStatement + "\n")
 #-----------------------------------------------------------------------------------------------
 def write_new_file_from_FoundTokens(pFoundTokens, poutfile):
@@ -75,7 +75,9 @@ def parse_one_file():
     FoundTokens = MyLowLevelLinesParser.ParseLines(Lines, file_lll_rpt, infile)
     FoundStatements = MyStatementHandler.BuildStatements(FoundTokens)
     MySubqueryTree = MyStatementHandler.BuildSubqueryTree(FoundTokens, FoundStatements)
+    MyStatementHandler.BuildAbstraction03(FoundTokens, MySubqueryTree)
     for sq in MySubqueryTree:
+        file_lll_rpt.write(sq.Abstraction03 + "\n")
         ft = sq.tokens[0]
         Message = FoundTokens[ft].CsvLineFromToken()
         Message += " IS SUBQUERY IN "
