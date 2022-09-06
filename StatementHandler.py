@@ -122,13 +122,14 @@ class StatementHandler:
         while i < len(pSubqueryTree[pparentnr].tokens) - 1:
             ft_i = pSubqueryTree[pparentnr].tokens[i]
             ft_ip1 = pSubqueryTree[pparentnr].tokens[i + 1]
-            CreateTable = False
+            NoSubqueryStart = False
             if i > 0:
                 ft_im1 = pSubqueryTree[pparentnr].tokens[i - 1]
-                if pFoundTokens[ft_im1].TokenType == "KEYWORD" and pFoundTokens[ft_im1].TokenContent == "AS":
-                    CreateTable = True
+                if pFoundTokens[ft_im1].TokenType == "KEYWORD" and pFoundTokens[ft_im1].TokenContent in ["AS", "USING"]:
+                    NoSubqueryStart = True
 
-            if pFoundTokens[ft_i].TokenType == "SINGLECHAR" and pFoundTokens[ft_i].TokenContent == "(" and CreateTable == False:
+            if (pFoundTokens[ft_i].TokenType == "SINGLECHAR" and pFoundTokens[ft_i].TokenContent == "("
+                                                     and NoSubqueryStart == False):
                 if pFoundTokens[ft_ip1].TokenType == "KEYWORD" and pFoundTokens[ft_ip1].TokenContent == "SELECT":
                     InSubQuery = True
                     j = i + 2
