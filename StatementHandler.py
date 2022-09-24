@@ -93,6 +93,70 @@ class StatementHandler:
                 volatiletables.append(s.CleanStatement[c1:c1 + c2].upper())
         return volatiletables
 #-----------------------------------------------------------------------------------------------
+    def SearchCleanStatement(self, pSearchArg, pListOfStatements, pstnr, pFoundTokens):
+        #This returns a first match in the entire statement but ignores the possibility of multiple matches
+        #within the same statement. Later we may need to extend this.
+        MyResult = []
+        if pListOfStatements[pstnr].CleanStatement.find(pSearchArg) == -1:
+            return MyResult
+        
+        a = pSearchArg.split(" ")
+        n = len(a)
+        if a[n - 1] == "":
+            a.pop()
+            n -= 1
+
+        AllIdentified = False
+        i = -1
+        while AllIdentified == False:
+            i += 1
+            Identified = True
+            for m in range(n):
+                ft = pListOfStatements[pstnr].tokens[i + m]
+                if pFoundTokens[ft].CleanContent() != a[m]:
+                    Identified = False
+            if Identified == True:
+                AllIdentified = True
+
+        assert AllIdentified == True
+
+        for m in range(n):
+            MyResult.append(pListOfStatements[pstnr].tokens[i + m])
+
+        return MyResult
+#-----------------------------------------------------------------------------------------------
+    def SearchAbstraction02(self, pSearchArg, pListOfStatements, pstnr, pFoundTokens):
+        #This returns a first match in the entire statement but ignores the possibility of multiple matches
+        #within the same statement. Later we may need to extend this.
+        MyResult = []
+        if pListOfStatements[pstnr].Abstraction02.find(pSearchArg) == -1:
+            return MyResult
+        
+        a = pSearchArg.split(" ")
+        n = len(a)
+        if a[n - 1] == "":
+            a.pop()
+            n -= 1
+
+        AllIdentified = False
+        i = -1
+        while AllIdentified == False:
+            i += 1
+            Identified = True
+            for m in range(n):
+                ft = pListOfStatements[pstnr].tokens[i + m]
+                if pFoundTokens[ft].PatternContent() != a[m]:
+                    Identified = False
+            if Identified == True:
+                AllIdentified = True
+
+        assert AllIdentified == True
+
+        for m in range(n):
+            MyResult.append(pListOfStatements[pstnr].tokens[i + m])
+
+        return MyResult
+#-----------------------------------------------------------------------------------------------
     def BuildAbstraction03(self, pFoundTokens, pSubqueryTree):
         #Here we represent a subquery by "SUBQUERY"
         for stnr in range(len(pSubqueryTree)):

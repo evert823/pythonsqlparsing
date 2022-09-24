@@ -78,15 +78,11 @@ def parse_one_file():
     MyStatementHandler.BuildAbstraction03(FoundTokens, MySubqueryTree)
     for sq in MySubqueryTree:
         file_lll_rpt.write(sq.Abstraction03 + "\n")
-        ft = sq.tokens[0]
-        Message = FoundTokens[ft].CsvLineFromToken()
-        Message += " IS SUBQUERY IN "
-        if sq.ParentStatement > -1:
-            ft_parent = MySubqueryTree[sq.ParentStatement].tokens[0]
-            Message += FoundTokens[ft_parent].CsvLineFromToken()
-        Message += " NestedLevel : " + str(sq.NestedLevel)
-        if sq.NestedLevel > 0:
-            print(Message)
+        print("NestedLevel : " + str(sq.NestedLevel))
+    for stnr in range(len(MySubqueryTree)):
+        a = MyStatementHandler.SearchAbstraction02("IDENTIFIER = STRINGLITERAL ", MySubqueryTree, stnr, FoundTokens)
+        if len(a) > 0:
+            print(infile + "|" + FoundTokens[a[0]].CsvLineFromToken() + "| Found my pattern")
 
 #    MyStatementHandler.FindFirstStatements(FoundTokens, FoundStatements, file_lll_rpt)
 

@@ -54,18 +54,18 @@ class NewInserts:
 
 class KeywordList:
     def __init__(self):
-        self.ValidKeyWords = {"SELECT", "INSERT", "UPDATE", "CREATE", "ALL",
+        self.ValidKeyWords = {"SELECT", "SEL", "INSERT", "UPDATE", "CREATE", "ALL",
                               "DELETE", "FROM", "AS", "USING", "REPLACE", "OR", 
                               "VIEW", "TABLE", "PRIMARY", "INDEX", "PARTITION",
                               "SET", "ERROROUT", "STDOUT", "AND", "WHERE",
                               "MULTISET", "VOLATILE", "WITH", "DATA", "GROUP", "BY",
                               "IF", "ERRORCODE", "THEN", "GOTO", "ON", "COMMIT",
                               "PRESERVE", "ROWS", "NOT", "IS", "NULL", "SUBSTR", "CASE", "WHEN",
-                              "END", "COALESCE", "TO_DATE", "CAST", "BETWEEN",
+                              "END", "COALESCE", "TO_DATE", "CAST", "BETWEEN", "QUALIFY", "HAVING",
                               "INTO", "COLLECT", "STATISTICS", "STATS", "COLUMN", "QUIT", "LABEL", "VALUES", "MERGE",
                               "INNER", "LEFT", "RIGHT", "FULL", "OUTER", "JOIN", "DISTINCT", "ORDER",
                               "OVER", "ELSE", "MAX", "MIN", "RANK", "ROW_NUMBER", "TRIM", "USER", "CURRENT_TIMESTAMP", "SESSION",
-                              "SAMPLE", "DROP", "QUIT", "BT", "ET", "DATABASE", "ALTER",
+                              "SAMPLE", "DROP", "QUIT", "BT", "ET", "DATABASE", "ALTER", "IN",
                               "FALLBACK", "NO", "BEFORE", "AFTER", "JOURNAL", "CHECKSUM", "DEFAULT",
                               "VARCHAR", "CHARACTER", "CASESPECIFIC", "DATE", "FORMAT", "INTEGER", "CHAR",
-                              "LATIN"}
+                              "LATIN", "POSITION", "STRTOK"}
