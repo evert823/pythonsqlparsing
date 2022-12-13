@@ -43,6 +43,7 @@ class SQLStatement:
         self.CleanStatement = ""
         self.Abstraction02 = ""
         self.Abstraction03 = ""
+        self.QualifiedTargetObjectName = ""
         self.ParentStatement = -1
         self.NestedLevel = 0
 
@@ -56,8 +57,8 @@ class KeywordList:
     def __init__(self):
         self.ValidKeyWords = {"SELECT", "SEL", "INSERT", "UPDATE", "CREATE", "ALL",
                               "DELETE", "FROM", "AS", "USING", "REPLACE", "OR", 
-                              "VIEW", "TABLE", "PRIMARY", "INDEX", "PARTITION",
-                              "SET", "ERROROUT", "STDOUT", "AND", "WHERE",
+                              "VIEW", "TABLE", "PRIMARY", "INDEX", "PARTITION", "RESET",
+                              "SET", "ERROROUT", "STDOUT", "AND", "WHERE", "UNION",
                               "MULTISET", "VOLATILE", "WITH", "DATA", "GROUP", "BY",
                               "IF", "ERRORCODE", "THEN", "GOTO", "ON", "COMMIT",
                               "PRESERVE", "ROWS", "NOT", "IS", "NULL", "SUBSTR", "CASE", "WHEN",
@@ -68,4 +69,4 @@ class KeywordList:
                               "SAMPLE", "DROP", "QUIT", "BT", "ET", "DATABASE", "ALTER", "IN",
                               "FALLBACK", "NO", "BEFORE", "AFTER", "JOURNAL", "CHECKSUM", "DEFAULT",
                               "VARCHAR", "CHARACTER", "CASESPECIFIC", "DATE", "FORMAT", "INTEGER", "CHAR",
-                              "LATIN", "POSITION", "STRTOK"}
+                              "LATIN", "POSITION", "STRTOK", "PRECEDING", "FOLLOWING", "DENSE_RANK"}
