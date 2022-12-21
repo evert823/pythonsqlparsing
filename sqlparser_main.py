@@ -92,6 +92,9 @@ def parse_one_file():
     #MyStatementHandler.Set_QualifiedTargetObjectName(FoundTokens, FoundStatements)
     MyStatementHandler.Set_QualifiedTargetObjectName(FoundTokens, MySubqueryTree)
 
+    for st in FoundStatements:
+        print(st.QualifiedTargetObjectName + "|" + st.CleanStatement)
+
     targets = []
     for st in FoundStatements:
         if st.QualifiedTargetObjectName != "":

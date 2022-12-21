@@ -193,6 +193,31 @@ class StatementHandler:
 
         return MyResult
 #-----------------------------------------------------------------------------------------------
+    def Set_QualifiedTargetObjectName_Stats02(self, pFoundTokens, pListOfStatements, pstnr):
+        a = self.SearchAbstraction02("COLLECT STATISTICS IDENTIFIER . IDENTIFIER FROM IDENTIFIER",
+                                       pListOfStatements, pstnr, pFoundTokens)
+        if len(a) == 0:
+            a = self.SearchAbstraction02("COLLECT STATS IDENTIFIER . IDENTIFIER FROM IDENTIFIER",
+                                           pListOfStatements, pstnr, pFoundTokens)
+        if len(a) > 0:
+            ff1 = a[2]
+            ff2 = a[3]
+            ff3 = a[4]
+            pListOfStatements[pstnr].QualifiedTargetObjectName = pFoundTokens[ff1].TokenContent
+            pListOfStatements[pstnr].QualifiedTargetObjectName += pFoundTokens[ff2].TokenContent
+            pListOfStatements[pstnr].QualifiedTargetObjectName += pFoundTokens[ff3].TokenContent
+            return;
+
+        a = self.SearchAbstraction02("COLLECT STATISTICS IDENTIFIER FROM IDENTIFIER",
+                                       pListOfStatements, pstnr, pFoundTokens)
+        if len(a) == 0:
+            a = self.SearchAbstraction02("COLLECT STATS IDENTIFIER FROM IDENTIFIER",
+                                           pListOfStatements, pstnr, pFoundTokens)
+        if len(a) > 0:
+            ff1 = a[2]
+            pListOfStatements[pstnr].QualifiedTargetObjectName = pFoundTokens[ff1].TokenContent
+            return;
+#-----------------------------------------------------------------------------------------------
     def Set_QualifiedTargetObjectName_Stats(self, pFoundTokens, pListOfStatements, pstnr):
         a = self.SearchAbstraction02("COLLECT STATISTICS", pListOfStatements, pstnr, pFoundTokens)
         if len(a) == 0:
@@ -203,6 +228,9 @@ class StatementHandler:
         
         b = self.SearchAbstraction02("ON IDENTIFIER . IDENTIFIER", pListOfStatements, pstnr, pFoundTokens)
         c = self.SearchAbstraction02("ON IDENTIFIER", pListOfStatements, pstnr, pFoundTokens)
+
+        if len(c) == 0:
+            return
 
         if len(b) == 0:
             ff = c[1]
@@ -370,6 +398,8 @@ class StatementHandler:
                     self.Set_QualifiedTargetObjectName_Update01(pFoundTokens, pListOfStatements, stnr)
                 if pListOfStatements[stnr].QualifiedTargetObjectName == "":
                     self.Set_QualifiedTargetObjectName_Stats(pFoundTokens, pListOfStatements, stnr)
+                if pListOfStatements[stnr].QualifiedTargetObjectName == "":
+                    self.Set_QualifiedTargetObjectName_Stats02(pFoundTokens, pListOfStatements, stnr)
 #-----------------------------------------------------------------------------------------------
     def StatementUsesObject(self, pFoundTokens, pListOfStatements, pstnr, pTableViewName):
         schemaname = ""

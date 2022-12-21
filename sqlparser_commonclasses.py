@@ -56,7 +56,7 @@ class NewInserts:
 class KeywordList:
     def __init__(self):
         self.ValidKeyWords = {"SELECT", "SEL", "INSERT", "UPDATE", "CREATE", "ALL",
-                              "DELETE", "FROM", "AS", "USING", "REPLACE", "OR", 
+                              "DELETE", "FROM", "AS", "USING", "REPLACE", "OR", "RENAME", "TO",
                               "VIEW", "TABLE", "PRIMARY", "INDEX", "PARTITION", "RESET",
                               "SET", "ERROROUT", "STDOUT", "AND", "WHERE", "UNION",
                               "MULTISET", "VOLATILE", "WITH", "DATA", "GROUP", "BY",
